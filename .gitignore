@@ -1,0 +1,39 @@
+# PowerShell
+*.ps1.bak
+*.ps1~
+*.pssession
+
+# モジュールビルド出力
+*.dll
+*.pdb
+bin/
+out/
+
+# 環境・ローカル設定
+.env
+.env.local
+*.local.ps1
+config/local.*
+
+# OS
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# IDE
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# ログ・一時ファイル
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+
+# NuGet / パッケージ
+packages/
+*.nupkg
