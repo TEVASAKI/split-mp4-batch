@@ -6,8 +6,8 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-# Markdownリンクごと除去
-$pattern = '\[ppl-ai-file-upload\.s3\.amazonaws[^\]]*\]\(https://ppl-ai-file-upload\.s3\.amazonaws\.com[^\)]*\)'
+# 不完全リンクパターン
+$pattern = '\[ppl-ai-file-upload\.s3\.amazonaws\]\('
 
 $extensions = @("*.md","*.txt")
 

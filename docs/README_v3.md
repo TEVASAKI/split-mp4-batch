@@ -3,15 +3,15 @@
 ## 概要
 
 本スクリプトは、指定ディレクトリ内の mp4 ファイルを  
-**一定数（デフォルト10件）ごとにフォルダ分割して移動する PowerShell バッチ**である。 [ppl-ai-file-upload.s3.amazonaws](
+**一定数（デフォルト10件）ごとにフォルダ分割して移動する PowerShell バッチ**である。 
 
 - フォルダ命名規則：`<BaseName><連番2桁>`（例：20251001）
 - DryRun（事前確認）対応
 - 詳細ログ出力
 - 例外発生時の完全ロールバック対応
-- 異常系テストコード完備 [ppl-ai-file-upload.s3.amazonaws](
+- 異常系テストコード完備 
 
-業務用途・大量ファイル・外付けHDD運用を前提に設計されている。 [ppl-ai-file-upload.s3.amazonaws](
+業務用途・大量ファイル・外付けHDD運用を前提に設計されている。 
 
 ***
 
@@ -23,7 +23,7 @@
 | 分割単位   | 10ファイル（変更可）             |
 | 並び順     | ファイル名昇順                   |
 | 実行場所   | スクリプトと同一ディレクトリ     |
-| ログ       | `_log/split_mp4_YYYYMMDD_HHMMSS.log` | [ppl-ai-file-upload.s3.amazonaws](
+| ログ       | `_log/split_mp4_YYYYMMDD_HHMMSS.log` | 
 
 ***
 
@@ -32,7 +32,7 @@
 ### 1. DryRun 機能
 - `-DryRun` 指定時は **ファイル・フォルダ操作を一切行わない**
 - ログ出力は本番と完全一致
-- 実行結果の事前検証が可能 [ppl-ai-file-upload.s3.amazonaws](
+- 実行結果の事前検証が可能 
 
 ```powershell
 .\split_mp4.ps1 -DryRun
@@ -40,7 +40,7 @@
 
 ### 2. ログ出力
 
-時刻付きで以下を記録 [ppl-ai-file-upload.s3.amazonaws](
+時刻付きで以下を記録 
 
 - 開始／終了
 - フォルダ作成（MKDIR）
@@ -50,7 +50,7 @@
 
 ### 3. 例外時ロールバック
 
-処理途中で例外が発生した場合： [ppl-ai-file-upload.s3.amazonaws](
+処理途中で例外が発生した場合： 
 
 - 移動済みファイルを 逆順で元の場所へ戻す
 - 空フォルダは削除
@@ -60,7 +60,7 @@
 
 - `-LiteralPath` を全面使用（ワイルドカード事故防止）
 - 既存ファイル衝突時は即 Abort
-- `Set-StrictMode -Version Latest` による品質担保 [ppl-ai-file-upload.s3.amazonaws](
+- `Set-StrictMode -Version Latest` による品質担保 
 
 ## バージョンアップ履歴（重要）
 
@@ -68,25 +68,25 @@
 
 - cmd（bat）ベース実装
 - `/10` 演算ミスによるエラー発生
-- ワイルドカード誤認識問題あり [ppl-ai-file-upload.s3.amazonaws](
+- ワイルドカード誤認識問題あり 
 
 ### v2（PowerShell移行）
 
 - PowerShell へ全面移行
 - 基本分割ロジック実装
-- ログ出力追加 [ppl-ai-file-upload.s3.amazonaws](
+- ログ出力追加 
 
 ### v3（安定化）
 
 - `-LiteralPath` 採用
 - フォルダ名生成バグ修正
-- フォーマット指定子エラー修正 [ppl-ai-file-upload.s3.amazonaws](
+- フォーマット指定子エラー修正 
 
 ### v4（安全性強化）
 
 - DryRun 実装
 - try/catch/finally 導入
-- 例外時ロールバック実装 [ppl-ai-file-upload.s3.amazonaws](
+- 例外時ロールバック実装 
 
 ### v5（リファクタリング）
 
@@ -94,7 +94,7 @@
 - フォルダ計算ロジックを関数化
 - ロールバック順序を Index で保証
 - 作成フォルダの重複管理修正
-- ※ 仕様変更なし（純リファクタリング） [ppl-ai-file-upload.s3.amazonaws](
+- ※ 仕様変更なし（純リファクタリング） 
 
 ## テストコード構成
 
@@ -103,7 +103,7 @@
 - ダミー mp4 自動生成
 - DryRun → 本実行の段階実行
 - フォルダ構成・ログ確認
-- テスト後の自動クリーンアップ [ppl-ai-file-upload.s3.amazonaws](
+- テスト後の自動クリーンアップ 
 
 ### 異常系テスト
 - `test_split_mp4_abnormal.ps1`
@@ -114,7 +114,7 @@
 - すべてにおいて：
   - 期待通り例外発生
   - ロールバック完全実行
-  - 環境破壊なし [ppl-ai-file-upload.s3.amazonaws](
+  - 環境破壊なし 
 
 ## 実行方法（本番）
 
@@ -131,26 +131,27 @@ powershell -ExecutionPolicy Bypass -File split_mp4.ps1 -DryRun
 
 - 外付けHDD（USB3）への大量動画整理
 - 月次・案件単位でのファイルアーカイブ
-- 人手作業の置き換え・事故防止 [ppl-ai-file-upload.s3.amazonaws](
+- 人手作業の置き換え・事故防止 
 
 ## 注意事項
 
 - mp4 以外は対象外
 - 同名ファイルが既に存在する場合は処理中断
-- 並列処理は未実装（安全性優先） [ppl-ai-file-upload.s3.amazonaws](
+- 並列処理は未実装（安全性優先） 
 
 ## 今後の拡張候補（未実装）
 
 - 進捗率（%）表示
 - 処理時間見積
 - `-Confirm` オプション
-- Pester による完全自動テスト [ppl-ai-file-upload.s3.amazonaws](
+- Pester による完全自動テスト 
 
 ## まとめ
 
 本スクリプトは  
 「壊れない・戻せる・事前に検証できる」を  
-最優先に設計されたファイル整理バッチである。 [ppl-ai-file-upload.s3.amazonaws](
+最優先に設計されたファイル整理バッチである。 
 
 業務用途での使用を前提としており、  
-テスト・ログ・ロールバックを含めた一連の運用が可能。 [ppl-ai-file-upload.s3.amazonaws](
+テスト・ログ・ロールバックを含めた一連の運用が可能。 
+
