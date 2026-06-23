@@ -131,7 +131,7 @@ catch {
 finally {
     # finallyが実行される終了経路ではロールバックを試行するが、
     # プロセス強制終了、OS停止、電源断などではロールバックを保証できない。
-    if (-not $script:正常完了 -and -not $DryRun -and $MoveHistory.Count -gt 0) {
+    if (-not $script:正常完了 -and -not $DryRun -and ($MoveHistory.Count -gt 0 -or $CreatedDirs.Count -gt 0)) {
         Write-Log "ロールバック開始"
 
         foreach ($m in ($MoveHistory | Sort-Object Index -Descending)) {
