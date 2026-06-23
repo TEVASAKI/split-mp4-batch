@@ -19,10 +19,14 @@ Write-Host "MP4 分割処理 テストモード開始" -ForegroundColor Green
 Pause-Step "① テスト環境を初期化します"
 
 # --- テスト環境作成 ---
+$元のディレクトリ = Get-Location
+
 if (Test-Path $testDir) {
     Remove-Item $testDir -Recurse -Force
 }
 New-Item -ItemType Directory -Path $testDir | Out-Null
+
+try {
 Set-Location $testDir
 
 Pause-Step "② ダミーMP4を作成します（37個）"
@@ -91,3 +95,7 @@ Get-Content $logFile
 
 Write-Host ""
 Write-Host "テスト完了。ログは $testDir\$logFile に保存されています。" -ForegroundColor Green
+}
+finally {
+    Set-Location -LiteralPath $元のディレクトリ
+}
