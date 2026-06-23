@@ -26,7 +26,7 @@ function Write-Log {
 
     $line = "[{0}] {1}" -f (Get-Date -Format "HH:mm:ss"), $Message
     Write-Host $line
-    Add-Content -LiteralPath $LogFile -Value $line
+    Add-Content -LiteralPath $LogFile -Value $line -Encoding UTF8
 }
 
 function Abort {
@@ -77,8 +77,10 @@ Write-Log "開始: mp4=$($files.Count) / GroupSize=$($Config.GroupSize) / DryRun
 # ==============================
 # 実行
 # ==============================
-$MoveHistory = @()
-$CreatedDirs = @()
+$MoveHistory  = @()
+$CreatedDirs  = @()
+# 正常完了フラグ（false のまま finally に入った場合はロールバックを試行する）
+$script:正常完了 = $false
 
 try {
     for ($i = 0; $i -lt $files.Count; $i++) {
@@ -89,7 +91,7 @@ try {
         if (!(Test-Path -LiteralPath $t.TargetDir)) {
             Write-Log "MKDIR: $($t.FolderName)"
             if (-not $DryRun) {
-                New-Item -ItemType Directory -Path $t.TargetDir | Out-Null
+                New-Item -ItemType Directory -Path $t.TargetDir -ErrorAction Stop | Out-Null
                 if ($CreatedDirs -notcontains $t.TargetDir) {
                     $CreatedDirs += $t.TargetDir
                 }
@@ -100,43 +102,74 @@ try {
             Abort "既存ファイル衝突: $($t.TargetPath)"
         }
 
-        Write-Log "MOVE: $($file.Name) -> $($t.FolderName)"
-
-        $MoveHistory += [PSCustomObject]@{
-            Index = $i
-            From  = $file.FullName
-            To    = $t.TargetPath
+        # Dry-run 時はログに識別子を付けて、実移動は行わない
+        if ($DryRun) {
+            Write-Log "[DRY-RUN] MOVE: $($file.Name) -> $($t.FolderName)"
         }
+        else {
+            Write-Log "MOVE: $($file.Name) -> $($t.FolderName)"
 
-        if (-not $DryRun) {
-            Move-Item -LiteralPath $file.FullName -Destination $t.TargetPath
-        }
-    }
+            Move-Item -LiteralPath $file.FullName -Destination $t.TargetPath -ErrorAction Stop
 
-    Write-Log "正常終了"
-}
-catch {
-    Write-Log "例外発生。ロールバック開始"
-
-    foreach ($m in ($MoveHistory | Sort-Object Index -Descending)) {
-        if (Test-Path -LiteralPath $m.To) {
-            Move-Item -LiteralPath $m.To -Destination $m.From -Force
-            Write-Log "ROLLBACK: $($m.To) -> $($m.From)"
-        }
-    }
-
-    foreach ($dir in ($CreatedDirs | Sort-Object -Descending)) {
-        if (Test-Path -LiteralPath $dir) {
-            if (-not (Get-ChildItem -LiteralPath $dir -Force)) {
-                Remove-Item -LiteralPath $dir
-                Write-Log "RMDIR: $dir"
+            # 移動成功後のみ履歴へ記録する
+            $MoveHistory += [PSCustomObject]@{
+                Index = $i
+                From  = $file.FullName
+                To    = $t.TargetPath
             }
         }
     }
 
-    Write-Log "ロールバック完了"
+    Write-Log "正常終了"
+    # すべての処理が成功した場合のみフラグを立てる
+    $script:正常完了 = $true
+}
+catch {
+    Write-Log "エラーが発生しました: $($_.Exception.Message)"
     throw
 }
 finally {
+    # finallyが実行される終了経路ではロールバックを試行するが、
+    # プロセス強制終了、OS停止、電源断などではロールバックを保証できない。
+    if (-not $script:正常完了 -and -not $DryRun -and $MoveHistory.Count -gt 0) {
+        Write-Log "ロールバック開始"
+
+        foreach ($m in ($MoveHistory | Sort-Object Index -Descending)) {
+            if (Test-Path -LiteralPath $m.To) {
+                # 復元先に同名ファイルがある場合は上書きせず記録する
+                if (Test-Path -LiteralPath $m.From) {
+                    Write-Log "ロールバック先に同名ファイルが存在するため、復元を中断しました: $($m.From)"
+                    continue
+                }
+
+                try {
+                    Move-Item -LiteralPath $m.To -Destination $m.From -ErrorAction Stop
+                    Write-Log "ROLLBACK: $($m.To) -> $($m.From)"
+                }
+                catch {
+                    Write-Log "ロールバックに失敗しました。手動で状態を確認してください: $($m.To)"
+                }
+            }
+        }
+
+        foreach ($dir in ($CreatedDirs | Sort-Object -Descending)) {
+            if (Test-Path -LiteralPath $dir) {
+                $残存項目 = @(Get-ChildItem -LiteralPath $dir -Force)
+
+                if ($残存項目.Count -eq 0) {
+                    try {
+                        Remove-Item -LiteralPath $dir -ErrorAction Stop
+                        Write-Log "RMDIR: $dir"
+                    }
+                    catch {
+                        Write-Log "空フォルダの削除に失敗しました: $dir"
+                    }
+                }
+            }
+        }
+
+        Write-Log "ロールバック処理終了"
+    }
+
     Write-Log "処理終了"
 }

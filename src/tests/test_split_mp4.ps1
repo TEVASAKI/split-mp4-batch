@@ -15,10 +15,10 @@ if (Test-Path $TestRoot) {
 
 New-Item -ItemType Directory -Path $TestRoot | Out-Null
 
-# テスト対象スクリプトをテスト環境にコピー（Split_mp4.ps1 は $PSScriptRoot をルートにするため）
-$ScriptUnderTest = Join-Path $PSScriptRoot "..\scripts\Split_mp4.ps1"
+# テスト対象スクリプトをテスト環境にコピー（Split_mp4_production_v3.ps1 は $PSScriptRoot をルートにするため）
+$ScriptUnderTest = Join-Path $PSScriptRoot "..\scripts\Split_mp4_production_v3.ps1"
 if (-not (Test-Path -LiteralPath $ScriptUnderTest)) { throw "テスト対象が見つかりません: $ScriptUnderTest" }
-Copy-Item -LiteralPath $ScriptUnderTest -Destination (Join-Path $TestRoot "split_mp4.ps1") -Force
+Copy-Item -LiteralPath $ScriptUnderTest -Destination (Join-Path $TestRoot "Split_mp4_production_v3.ps1") -Force
 
 Set-Location $TestRoot
 
@@ -39,14 +39,14 @@ Read-Host "Enterで DryRun テスト開始"
 # ==============================
 # 本番処理（DryRun）
 # ==============================
-.\split_mp4.ps1 -DryRun
+.\Split_mp4_production_v3.ps1 -DryRun
 
 Read-Host "Enterで 本実行テスト開始"
 
 # ==============================
 # 本番処理（本実行）
 # ==============================
-.\split_mp4.ps1
+.\Split_mp4_production_v3.ps1
 
 # ==============================
 # 結果確認

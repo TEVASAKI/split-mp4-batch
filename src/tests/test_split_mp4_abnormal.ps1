@@ -10,6 +10,9 @@ function Reset-TestEnv {
         Remove-Item -LiteralPath $TestRoot -Recurse -Force
     }
     New-Item -ItemType Directory -Path $TestRoot | Out-Null
+    # テスト対象スクリプトをテスト環境にコピー
+    $スクリプト = Join-Path $PSScriptRoot "..\scripts\Split_mp4_production_v3.ps1"
+    Copy-Item -LiteralPath $スクリプト -Destination (Join-Path $TestRoot "Split_mp4_production_v3.ps1") -Force
     Set-Location $TestRoot
 }
 
@@ -31,7 +34,7 @@ New-Item -ItemType Directory -Path "20251001" | Out-Null
 New-Item -ItemType File -Path "20251001\dummy_01.mp4" | Out-Null
 
 try {
-    .\split_mp4.ps1
+    .\Split_mp4_production_v3.ps1
 }
 catch {
     Write-Host "✔ 期待通り Abort 発生"
@@ -47,13 +50,15 @@ Reset-TestEnv
 Create-DummyMp4 15
 
 # 途中で削除して Move-Item を失敗させる
-$job = Start-Job {
+$対象ディレクトリ = $TestRoot
+$job = Start-Job -ArgumentList $対象ディレクトリ {
+    param($dir)
     Start-Sleep -Seconds 1
-    Remove-Item dummy_08.mp4 -Force
+    Remove-Item -LiteralPath (Join-Path $dir "dummy_08.mp4") -Force
 }
 
 try {
-    .\split_mp4.ps1
+    .\Split_mp4_production_v3.ps1
 }
 catch {
     Write-Host "✔ 例外発生を確認"
@@ -80,7 +85,7 @@ $file = Get-Item dummy_03.mp4
 $file.Attributes = 'ReadOnly'
 
 try {
-    .\split_mp4.ps1
+    .\Split_mp4_production_v3.ps1
 }
 catch {
     Write-Host "✔ 読み取り専用による例外発生"
