@@ -1,43 +1,45 @@
-# PowerShell プロジェクト
+# split-mp4-batch
 
-PowerShell プロジェクトのルートです。
+`.mp4` ファイルを10件単位で連番フォルダへ自動分類する PowerShell バッチ。
 
-## フォルダ構成
+## 本番スクリプト
 
 ```
-src/
-├── scripts/   # 実行用スクリプト
-├── modules/   # 再利用可能なモジュール
-├── tests/     # テストスクリプト
-config/        # 設定ファイル
-docs/          # ドキュメント
-scripts/       # ビルド・デプロイ用スクリプト
-.vscode/       # VS Code / Cursor 設定
+src/scripts/Split_mp4.ps1
 ```
 
-## 本プロジェクトの構成（MP4 分割スクリプト）
+## 使い方（概要）
 
-- **src/scripts/** … 本番スクリプト（1本のみ）
-  - `Split_mp4.ps1` … **本番版**（ロールバック機能あり）
-- **src/archive/** … 旧バージョン・仮本番スクリプト（参照用。実運用では使用しないこと）
-- **src/tests/** … テスト用スクリプト（test_split_mp4.ps1, test_split_mp4_abnormal.ps1 等）
-- **docs/** … 手順書（README_v1.md, README_v2.md）、テストログ（test-logs/）
+```powershell
+# 事前確認（必須）
+.\Split_mp4.ps1 -DryRun
 
-## 重要な注意事項
+# 本番実行
+.\Split_mp4.ps1
+```
 
-- **実運用には `src/scripts/Split_mp4.ps1` を使用すること。**
-- 本番実行前に必ず `-DryRun` スイッチで事前確認を行うこと。
-- ロールバックは例外発生時に自動実行されるが、プロセスの強制終了・OS 停止・電源断などでは保証できない。重要なファイルは事前にバックアップを取ること。
-- ロールバック時、移動先に同名ファイルが存在する場合は上書きせず、スキップして記録する。
-- `-DryRun` 実行時のログには `[DRY-RUN]` プレフィックスが付与される。
+詳細な実行手順・設定変更・ロールバック仕様は **[docs/README.md](docs/README.md)** を参照。
 
-## 使い方
+## リポジトリ構成
 
-1. モジュールは `src/modules/` に配置
-2. エントリポイントとなるスクリプトは `src/scripts/` に配置
-3. テストは `src/tests/` に Pester 等で記述
-4. 設定は `config/` に YAML/JSON 等で管理
+```
+split-mp4-batch/
+├── src/
+│   ├── scripts/
+│   │   └── Split_mp4.ps1               ← 本番スクリプト
+│   ├── tests/
+│   │   ├── test_split_mp4.ps1          ← 正常系テスト
+│   │   ├── test_split_mp4_abnormal.ps1 ← 異常系テスト
+│   │   ├── test_split_mp4_step.ps1     ← ステップ実行テスト
+│   │   └── 異常系のテスト.md
+│   └── archive/                        ← 旧バージョン（実運用では使わない）
+├── docs/
+│   └── README.md                       ← 詳細手順書
+└── README.md                           ← 本ファイル
+```
 
 ## 必要環境
 
-- PowerShell 5.1 または PowerShell 7+
+- Windows 10 / 11
+- PowerShell 5.1 以上
+- 管理者権限不要
