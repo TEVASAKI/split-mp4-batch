@@ -1,33 +1,45 @@
-# PowerShell プロジェクト
+# split-mp4-batch
 
-PowerShell プロジェクトのルートです。
+`.mp4` ファイルを10件単位で連番フォルダへ自動分類する PowerShell バッチ。
 
-## フォルダ構成
+## 本番スクリプト
 
 ```
-src/
-├── scripts/   # 実行用スクリプト
-├── modules/   # 再利用可能なモジュール
-├── tests/     # テストスクリプト
-config/        # 設定ファイル
-docs/          # ドキュメント
-scripts/       # ビルド・デプロイ用スクリプト
-.vscode/       # VS Code / Cursor 設定
+src/scripts/Split_mp4.ps1
 ```
 
-## 本プロジェクトの構成（MP4 分割スクリプト）
+## 使い方（概要）
 
-- **src/scripts/** … 本番用スクリプト（Split_mp4_production_v1.ps1, v2, provisional_split_mp4_ROLLBACK.ps1）
-- **src/tests/** … テスト用スクリプト（test_split_mp4_step.ps1, test_split_mp4_rollback.ps1）
-- **docs/** … 手順書（README_v1.md, README_v2.md）、テストログ（test-logs/）
+```powershell
+# 事前確認（必須）
+.\Split_mp4.ps1 -DryRun
 
-## 使い方
+# 本番実行
+.\Split_mp4.ps1
+```
 
-1. モジュールは `src/modules/` に配置
-2. エントリポイントとなるスクリプトは `src/scripts/` に配置
-3. テストは `src/tests/` に Pester 等で記述
-4. 設定は `config/` に YAML/JSON 等で管理
+詳細な実行手順・設定変更・ロールバック仕様は **[docs/README.md](docs/README.md)** を参照。
+
+## リポジトリ構成
+
+```
+split-mp4-batch/
+├── src/
+│   ├── scripts/
+│   │   └── Split_mp4.ps1               ← 本番スクリプト
+│   ├── tests/
+│   │   ├── test_split_mp4.ps1          ← 正常系テスト
+│   │   ├── test_split_mp4_abnormal.ps1 ← 異常系テスト
+│   │   ├── test_split_mp4_step.ps1     ← ステップ実行テスト
+│   │   └── 異常系のテスト.md
+│   └── archive/                        ← 旧バージョン（実運用では使わない）
+├── docs/
+│   └── README.md                       ← 詳細手順書
+└── README.md                           ← 本ファイル
+```
 
 ## 必要環境
 
-- PowerShell 5.1 または PowerShell 7+
+- Windows 10 / 11
+- PowerShell 5.1 以上
+- 管理者権限不要
