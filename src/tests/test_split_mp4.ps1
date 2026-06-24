@@ -23,7 +23,7 @@ Copy-Item -LiteralPath $ScriptUnderTest -Destination (Join-Path $TestRoot "Split
 $元のディレクトリ = Get-Location
 
 try {
-    Set-Location $TestRoot
+    Set-Location -LiteralPath $TestRoot
 
     # ==============================
     # ダミー mp4 作成

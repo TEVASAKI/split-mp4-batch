@@ -27,7 +27,7 @@ if (Test-Path -LiteralPath $testDir) {
 New-Item -ItemType Directory -Path $testDir | Out-Null
 
 try {
-    Set-Location $testDir
+    Set-Location -LiteralPath $testDir
 
     Pause-Step "② ダミーMP4を作成します（37個）"
 
