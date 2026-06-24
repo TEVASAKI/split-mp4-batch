@@ -6,7 +6,7 @@ $BaseName = "202510"
 $GroupSize = 10
 
 function Reset-TestEnv {
-    if (Test-Path $TestRoot) {
+    if (Test-Path -LiteralPath $TestRoot) {
         Remove-Item -LiteralPath $TestRoot -Recurse -Force
     }
     New-Item -ItemType Directory -Path $TestRoot | Out-Null
